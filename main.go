@@ -60,15 +60,7 @@ func init() {
 	}
 }
 
-func main() {
-
-	files, err := os.ReadDir(inFolder)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	file := files[0]
-
+func resizeImage(file os.DirEntry) {
 	src, err := imaging.Open(path.Join(inFolder, file.Name()))
 	if err != nil {
 		log.Fatal(err.Error())
@@ -79,5 +71,17 @@ func main() {
 	err = imaging.Save(src, path.Join(outFolder, file.Name()))
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err.Error())
+	}
+}
+
+func main() {
+
+	files, err := os.ReadDir(inFolder)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	for _, file := range files {
+		resizeImage(file)
 	}
 }

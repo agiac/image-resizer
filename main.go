@@ -3,21 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
+	resizeImages "github.com/agiac/image-resizer/resize-images"
 	"log"
 	"os"
-	"path"
-
-	"github.com/disintegration/imaging"
 )
 
 var inFolder string
 var outFolder string
+var width int
 
 func init() {
 	// Define command line arguments
 	flag.StringVar(&inFolder, "in", "", "The input folder containing the images")
-
 	flag.StringVar(&outFolder, "out", "", "The output folder where the results will be stored")
+	flag.IntVar(&width, "width", 0, "The resize width")
 
 	// Print help message
 	if len(os.Args) > 1 && (os.Args[1] == "--help" || os.Args[1] == "-h") {
@@ -40,6 +39,10 @@ func init() {
 		log.Fatal("Output folder is undefined")
 	}
 
+	if width == 0 {
+		log.Fatal("Width is undefined")
+	}
+
 	// Check whether the input folder exists
 	_, err := os.Stat(inFolder)
 
@@ -60,28 +63,8 @@ func init() {
 	}
 }
 
-func resizeImage(file os.DirEntry) {
-	src, err := imaging.Open(path.Join(inFolder, file.Name()))
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	src = imaging.Resize(src, 200, 0, imaging.Lanczos)
-
-	err = imaging.Save(src, path.Join(outFolder, file.Name()))
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err.Error())
-	}
-}
-
 func main() {
+	resizeImages.ResizeImages(inFolder, outFolder, width)
 
-	files, err := os.ReadDir(inFolder)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	for _, file := range files {
-		resizeImage(file)
-	}
+	fmt.Printf("Images saved in %s\n", outFolder)
 }
